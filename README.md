@@ -141,3 +141,110 @@ Fungsi 'logout()' dihubungkan ke route '/logout' pada blueprint authBp dengan me
 
 Fungsi 'check_if_token_is_revoked()' adalah fungsi yang digunakan untuk menentukan apakah suatu token akses ditarik atau dicabut. Fungsi ini ditentukan dengan '@jwt.token_in_blocklist_loader' untuk JWT manager yang digunakan dalam aplikasi. Di dalam fungsi, kita mengambil "jti" (JWT ID) dari JWT payload dan mencari token dengan "jti" tersebut dalam database menggunakan BlacklistToken. Jika token ditemukan, berarti token tersebut telah ditarik dan fungsi ini mengembalikan nilai True. Jika token tidak ditemukan, berarti token masih valid dan fungsi ini mengembalikan nilai False. Dengan menggunakan fungsi ini, kita dapat memastikan bahwa token akses yang ditarik atau dicabut akan dianggap tidak valid saat melakukan verifikasi otentikasi.
 
+### Code 3
+Code terdapat di app/frontend/__init__.py
+```
+from flask import Blueprint
+from flask_cors import CORS
+
+frontendBp = Blueprint('frontend', __name__)
+CORS(frontendBp)
+from app.frontend import routes
+```
+Code ini terdari import Blueprint dan CORS agar dapat menggunakan fungsi yang disediakan dari Flask dan Flask-CORS. Kemudian 'frontendBp' digunakan sebagai objek Blueprint agar bisa menggunakan fungsi Blueprint yang disediakan Flask, Blueprint diberi nama 'frontend'. Setelah itu CORS diterapkan menggunakan objek 'frontendBp' yang telah dibuat sebelumnya. 
+
+### Code 4
+app/frontend/routes.py
+```
+from app.frontend import frontendBp
+from flask import render_template
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
+@frontendBp.route('', strict_slashes = False)
+def home():
+    return render_template('tasks/todo.html')
+
+@frontendBp.route('auth/login', strict_slashes = False)
+def login():
+    return render_template('/auth/login.html')
+
+@frontendBp.route('auth/register', strict_slashes = False)
+def register():
+    return render_template('/auth/register.html')
+```
+Pertama-tama akan dilakukan import dari module untuk menggunakan fungsi yang ada pada module tersebut.
+
+Fungsi 'home()' digunakan sebagai rute utama pada blueprint frontendBp. Ketika permintaan diterima, maka fungsi 'home()' akan dijalankan, sehingga fungsi akan mengembalikan tampilan html yang berada di 'tasks/todo.html' dengan menggunakan 'render_template()'
+
+Fungsi 'login()' digunakan sebagai rute untuk halaman login pada blueprint frontendBp yang berada di 'auth/login'. Ketika permintaan diterima, maka fungsi 'login()' akan dijalankan, sehingga fungsi akan mengembalikan tampilan html yang berada di '/auth/login.html' dengan menggunakan 'render_template()'
+
+Fungsi register() digunakan sebagai rute untuk halaman registrasi pada blueprint frontendBp yang berada di auth/register Ketika permintaan diterima untuk rute ini, fungsi 'register()' akan dijalankan. Fungsi ini mengembalikan tampilan HTML yang dibuat menggunakan template '/auth/register.html' dengan menggunakan 'render_template()'.
+
+### Code 5
+Code ini berada di app/models/blacklist_token.py
+```
+from app.extension import db
+
+class BlacklistToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    jti = db.Column(db.String(36), nullable=False, unique=True)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "jti": self.jti
+        }
+```
+Pertama module 'db' diimport dari 'app.extension'. Kelas 'BlacklistToken' didefinisikan sebagai subclass dari 'db.Model' yang merupakan kelas dasar untuk menggunakan SQLAlchemy dalam Flask. method 'serialize(self)' untuk mengembalikan representasi serialisasi objek dalam bentuk dictionary. Dictionary berisi pasangan kunci yang mewakili atribut objek, yaitu 'id' dan 'jti'. Hal ini dilakukan untuk mengubah ke format yang lebih mudah dikirim.
+
+### Code 5
+Code ini berada di app/models/task.py
+```
+from app.extension import db
+
+class Tasks(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    title = db.Column(db.String(64), nullable=False)
+    description = db.Column(db.String(1024))
+    status = db.Column(db.Boolean, default = False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship('Users', back_populates = 'tasks')
+
+    def serialize(self): 
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description":self.description,
+            "status": self.status,
+            "user_id":self.user_id
+        }
+
+```
+Pertama module 'db' diimport dari 'app.extension'. Kelas 'Tasks' didefinisikan sebagai subclass dari 'db.Model' yang merupakan kelas dasar untuk menggunakan SQLAlchemy dalam Flask. Kelas ini memiliki beberapa kolom dalam tabel database, yaitu 'id', 'title', 'description', 'status', dan 'user_id'. 'user = db.relationship('Users', back_populates = 'tasks')' digunakan untuk mendefinikan relasi antara tabel 'tasks' dan 'users', yang berarti 'tasks' terhubung dengan satu pengguna 'users'.
+
+Method 'serialize(self)' digunakan untuk mengembalikan representasi serialisasi objek dalam bentuk dictionary. Dictionary berisi pasangan kunci yang mewakili atribut objek, yaitu 'id', 'title', 'description', 'status', dan 'user_id'. Hal ini dilakukan untuk mengubah ke format yang lebih mudah dikirim.
+
+### Code 6
+Code ini terdapat pada app/models/user.py
+```
+from app.extension import db
+
+# table database user
+class Users(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True, nullable=False)
+    email = db.Column(db.String(128), nullable=False)
+    password = db.Column(db.String(1024), nullable=False)
+    tasks = db.relationship('Tasks', back_populates='user')
+
+    # fungsi serialize untuk mengembalikan data dictionary
+    def serialize(self): 
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email":self.email
+        }
+```
+Pertama module 'db' diimport dari 'app.extension'. Kelas 'Users' didefinisikan sebagai subclass dari 'db.Model' yang merupakan kelas dasar untuk menggunakan SQLAlchemy dalam Flask. Kelas ini memiliki beberapa kolom dalam tabel database, yaitu 'id', 'name', 'email', dan 'password'. 'tasks = db.relationship('Tasks', back_populates = 'user')' digunakan untuk mendefinikan relasi antara tabel 'tasks' dan 'users', yang berarti 'users' terhubung 'tasks'.
+
+Method 'serialize(self)' digunakan untuk mengembalikan representasi serialisasi objek dalam bentuk dictionary. Dictionary berisi pasangan kunci yang mewakili atribut objek, yaitu 'id', 'name', dan 'email'. Hal ini dilakukan untuk mengubah ke format yang lebih mudah dikirim.
