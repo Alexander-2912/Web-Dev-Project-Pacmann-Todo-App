@@ -197,7 +197,7 @@ class BlacklistToken(db.Model):
 ```
 Pertama module 'db' diimport dari 'app.extension'. Kelas 'BlacklistToken' didefinisikan sebagai subclass dari 'db.Model' yang merupakan kelas dasar untuk menggunakan SQLAlchemy dalam Flask. method 'serialize(self)' untuk mengembalikan representasi serialisasi objek dalam bentuk dictionary. Dictionary berisi pasangan kunci yang mewakili atribut objek, yaitu 'id' dan 'jti'. Hal ini dilakukan untuk mengubah ke format yang lebih mudah dikirim.
 
-### Code 5
+### Code 6
 Code ini berada di app/models/task.py
 ```
 from app.extension import db
@@ -224,7 +224,7 @@ Pertama module 'db' diimport dari 'app.extension'. Kelas 'Tasks' didefinisikan s
 
 Method 'serialize(self)' digunakan untuk mengembalikan representasi serialisasi objek dalam bentuk dictionary. Dictionary berisi pasangan kunci yang mewakili atribut objek, yaitu 'id', 'title', 'description', 'status', dan 'user_id'. Hal ini dilakukan untuk mengubah ke format yang lebih mudah dikirim.
 
-### Code 6
+### Code 7
 Code ini terdapat pada app/models/user.py
 ```
 from app.extension import db
@@ -249,7 +249,7 @@ Pertama module 'db' diimport dari 'app.extension'. Kelas 'Users' didefinisikan s
 
 Method 'serialize(self)' digunakan untuk mengembalikan representasi serialisasi objek dalam bentuk dictionary. Dictionary berisi pasangan kunci yang mewakili atribut objek, yaitu 'id', 'name', dan 'email'. Hal ini dilakukan untuk mengubah ke format yang lebih mudah dikirim.
 
-### Code 7
+### Code 8
 Code ini berada di app/static/css/login.css
 ```
 .glass-background{
@@ -279,7 +279,7 @@ border: 1px solid rgba(0, 0, 0, 0.4);
 ```
 Code ini digunakan untuk memodifikasi elemen-elemen yang digunakan pada .html.
 
-### Code 8
+### Code 9
 Code ini berada di app/static/js/script-login.js
 ```
 const formLogin = document.getElementById("form-login")
