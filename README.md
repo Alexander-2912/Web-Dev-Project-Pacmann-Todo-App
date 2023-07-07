@@ -1,7 +1,19 @@
-# Web-Development
+![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/541629c3-e866-49a1-89c3-34c282322c49)# Web-Development
 
 ## Project Objective
 Objektif dari projek ini adalah membuat sebuah website yang dapat digunakan untuk menyimpan list-list suatu kegiatan, barang, maupun yang lainnya. Dalam pembuatannya, terdapat fitur-fitur dan batasan yang ada untuk diikuti. Hasil akhir dari project ini adalah terciptanya sebuah website yang responsif, dinamis, dan dapat digunakan dengan baik.
+
+## Website Layout
+![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/a75f5f1e-d0b5-4589-beb0-1aabacc19bc2)
+![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/6228ff05-2e33-44d6-8c10-87185d0f5ee1)
+![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/3a42715a-439d-4fdd-92f4-b878a16801f0)
+
+## Database
+![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/465dbfff-687e-4601-b429-1e051658fc76)
+![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/db019094-2688-468c-90f7-1b9befebdde3)
+![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/aa8118ff-a8b8-4511-9c95-ed23c575c50f)
+![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/0462f203-21ee-4625-a5de-c8965a635c3e)
+![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/c1a93eb2-b8da-4986-941a-c8d47e92f571)
 
 ## Functions
 Dalam projek ini terdapat banyak folder, file, dan code digunakan. Dokumentasi ini akan menjelaskan seluruh code yang digunakan secara singkat.
