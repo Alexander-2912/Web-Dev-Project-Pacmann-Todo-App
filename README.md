@@ -15,6 +15,18 @@ Objektif dari projek ini adalah membuat sebuah website yang dapat digunakan untu
 ![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/0462f203-21ee-4625-a5de-c8965a635c3e)
 ![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/c1a93eb2-b8da-4986-941a-c8d47e92f571)
 
+## Flowchart
+![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/1598063e-cdd3-499b-9ae8-3542dc1beed4)
+1. User masuk ke halaman login
+2. Apabila user belum memiliki akun, maka user dapat menekan tombol untuk masuk ke halaman register
+2.1 User mengisi seluruh form, kemudian setelah selesai akan didirect ke halaman login lagi
+3. Apabila user sudah memiliki akun, maka user dapat mengisi form dengan data yang dimiliki. Kemudian akan di direct ke halaman utama
+4. Pada halaman utama, user dapat menambahkan task dengan menekan tombol pada kanan bawah
+5. Setelah task terbuat, maka task tersebut memiliki tiga tombol, yaitu Delete, Edit, dan Done
+5.1 Tombol delete akan menghapus task tersebut
+5.2 Tombol edit akan memunculkan form untuk mengubah isi task
+5.3 Tombol done akan memindahkan task ke kolom kanan
+
 ## Functions
 Dalam projek ini terdapat banyak folder, file, dan code digunakan. Dokumentasi ini akan menjelaskan seluruh code yang digunakan secara singkat.
 
