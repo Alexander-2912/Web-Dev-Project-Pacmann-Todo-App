@@ -21,7 +21,7 @@ Code ini terdari import Blueprint dan CORS agar dapat menggunakan fungsi yang di
 
 ### Code 2
 Code tedapat pada app/auth/routes.py
-'''
+```
 from flask import request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt
@@ -31,10 +31,10 @@ from app.models.blacklist_token import BlacklistToken
 from app.models.user import Users
 from app.extension import db, jwt
 from app.auth import authBp
-'''
+```
 Code ini digunakan untuk melakukan import dari beberapa module agar dapat menggunakan fungsi yang ada pada module tersebut.
 
-'''
+```
 @authBp.route('/register', methods=['POST'], strict_slashes = False)
 def register():
     data = request.get_json()
@@ -59,13 +59,13 @@ def register():
     return jsonify({
         "message": "User registration is completed!"
     }), 200
-'''
+```
 Kode yang diberikan adalah penggunaan Blueprint dalam Flask untuk menangani rute '/register/' dan method 'POST'. Fungsi register() dihubungkan ke rute '/register' pada blueprint 'authBp'. Dalam fungsi register(), pertama-tama akan mengambil data JSON menggunakan 'register.get_json()', data yang diambil data 'name', 'email', dan 'password'.
 Setelah mendapatkan data, akan dilakukan pemeriksaan terhadap ketersediaan data yang ada. Jika ada data yang kosong, makan akan dikembalikan pesan error dan status kode 400.
 Jika data sudah terisi semua, makan data pengguna baru akan dimasukkan kedalam database. Jika terdapat kesalahan 'IntegrityError', itu menyatakan bahwa nama user sudah tersedia, dan akan dikembalikan pesan bahwa nama sudah terdaftar dan status kode 422
 Jika tidak ada kesalahan, pengguna baru berhasil ditambahkan kedalam database. Sebuah respon akan dikembalikan dan status kode 200
 
-'''
+```
 @authBp.route('/login', methods=['POST'], strict_slashes=False)
 def login():
     data = request.get_json()
@@ -94,7 +94,7 @@ def login():
         "access_token": access_token,
         "refresh_token": refresh_token
     }), 200
-'''
+```
 Kode yang diberikan adalah penggunaan Blueprint dalam Flask untuk menangani rute '/login/' dan method 'POST'. Fungsi login() dihubungkan ke rute '/login' pada blueprint 'authBp'. Dalam fungsi login(), pertama-tama akan mengambil data JSON menggunakan 'register.get_json()', data yang diambil data 'email', dan 'password'.
 Setelah mendapatkan data, akan dilakukan pemeriksaan terhadap ketersediaan data yang ada. Jika ada data yang kosong, makan akan dikembalikan pesan error dan status kode 400.
 Setelah memastikan data sudah diisi, maka selanjutnya akan dilakukan pemeriksaan di database apakah email dan password sudah sesuai. Jika pengguna tidak ditemukan, maka akan dikembalikan respon berupa pesan dan status kode 422
