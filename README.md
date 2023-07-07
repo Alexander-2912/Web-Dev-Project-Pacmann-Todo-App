@@ -9,6 +9,7 @@ Objektif dari projek ini adalah membuat sebuah website yang dapat digunakan untu
 ![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/3a42715a-439d-4fdd-92f4-b878a16801f0)
 
 ## Database
+![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/ab93ca45-f31d-4cb3-a094-b9bc948770ee)
 ![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/465dbfff-687e-4601-b429-1e051658fc76)
 ![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/db019094-2688-468c-90f7-1b9befebdde3)
 ![image](https://github.com/Alexander-2912/Web-Development/assets/118685091/aa8118ff-a8b8-4511-9c95-ed23c575c50f)
