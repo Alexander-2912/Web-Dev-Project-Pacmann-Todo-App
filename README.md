@@ -8,7 +8,7 @@ Dalam projek ini terdapat banyak folder, file, dan code digunakan. Dokumentasi i
 
 ### Code 1
 Code terdapat pada app/auth/__init__.py
-'''
+```
 from flask import Blueprint
 from flask_cors import CORS
 
@@ -16,7 +16,7 @@ authBp = Blueprint('auth', __name__)
 CORS(authBp)
 
 from app.auth import routes
-'''
+```
 Code ini terdari import Blueprint dan CORS agar dapat menggunakan fungsi yang disediakan dari Flask dan Flask-CORS. Kemudian 'authBp' digunakan sebagai objek Blueprint agar bisa menggunakan fungsi Blueprint yang disediakan Flask, Blueprint diberi nama 'auth'. Setelah itu CORS diterapkan menggunakan objek 'authBp' yang telah dibuat sebelumnya. 
 
 ### Code 2
@@ -61,8 +61,11 @@ def register():
     }), 200
 ```
 Kode yang diberikan adalah penggunaan Blueprint dalam Flask untuk menangani rute '/register/' dan method 'POST'. Fungsi register() dihubungkan ke rute '/register' pada blueprint 'authBp'. Dalam fungsi register(), pertama-tama akan mengambil data JSON menggunakan 'register.get_json()', data yang diambil data 'name', 'email', dan 'password'.
+
 Setelah mendapatkan data, akan dilakukan pemeriksaan terhadap ketersediaan data yang ada. Jika ada data yang kosong, makan akan dikembalikan pesan error dan status kode 400.
+
 Jika data sudah terisi semua, makan data pengguna baru akan dimasukkan kedalam database. Jika terdapat kesalahan 'IntegrityError', itu menyatakan bahwa nama user sudah tersedia, dan akan dikembalikan pesan bahwa nama sudah terdaftar dan status kode 422
+
 Jika tidak ada kesalahan, pengguna baru berhasil ditambahkan kedalam database. Sebuah respon akan dikembalikan dan status kode 200
 
 ```
@@ -73,7 +76,6 @@ def login():
     email = data.get('email', None)
     password = data.get('password', None)
 
-    # Fields are required
     if not email or not password:
         return jsonify({
             "message": "Email or Password is required!"
@@ -96,11 +98,13 @@ def login():
     }), 200
 ```
 Kode yang diberikan adalah penggunaan Blueprint dalam Flask untuk menangani rute '/login/' dan method 'POST'. Fungsi login() dihubungkan ke rute '/login' pada blueprint 'authBp'. Dalam fungsi login(), pertama-tama akan mengambil data JSON menggunakan 'register.get_json()', data yang diambil data 'email', dan 'password'.
+
 Setelah mendapatkan data, akan dilakukan pemeriksaan terhadap ketersediaan data yang ada. Jika ada data yang kosong, makan akan dikembalikan pesan error dan status kode 400.
+
 Setelah memastikan data sudah diisi, maka selanjutnya akan dilakukan pemeriksaan di database apakah email dan password sudah sesuai. Jika pengguna tidak ditemukan, maka akan dikembalikan respon berupa pesan dan status kode 422
 Jika tidak ada kesalahan, maka akses token akan dibuat dengan refresh token menggunakan fungsi 'create_access_token()' dan 'create_refresh_token()'
 
-'''
+```
 @authBp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh_token():
@@ -130,8 +134,10 @@ def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
     token = BlacklistToken.query.filter_by(jti=jti).first()
 
     return token is not None
-'''
+```
 Fungsi 'refresh_token()' dihubungkan ke route /refresh pada blueprint authBp dengan method 'POST'. Didalam fungsi terdapat @jwt_required(refresh=True) untuk memastikan hanya pengguna yang memiliki refresh token yang valid dapat mengaksesnya. Di dalam fungsi, kita mendapatkan identitas pengguna dari refresh token yang valid menggunakan 'get_jwt_identity()'. Kemudian, kita membuat akses token baru menggunakan 'create_access_token()' dengan identitas pengguna yang diperoleh. Akses token baru tersebut dikembalikan dalam respons JSON dengan status kode 200. Tujuan dari fungsi ini adalah untuk memberikan akses token baru kepada pengguna setelah refresh token mereka divalidasi.
+
 Fungsi 'logout()' dihubungkan ke route '/logout' pada blueprint authBp dengan method 'POST'. Didalam fungsi terdapat decorator @jwt_required(locations=['headers']) untuk memastikan hanya pengguna yang mengirimkan token akses dalam header permintaan yang dapat melakukan logout. Di dalam fungsi, kita mendapatkan informasi token yang digunakan dalam permintaan menggunakan get_jwt(). Selanjutnya, kita mengambil "jti" (JWT ID) dari token tersebut dan membuat objek BlacklistToken dengan menggunakan nilai "jti". Objek BlacklistToken kemudian ditambahkan ke database untuk memasukkan token ke dalam daftar token yang diambil. Setelah itu, perubahan pada basis data dikonfirmasi dengan melakukan db.session.commit(). Terakhir, sebuah respons JSON dikembalikan dengan pesan bahwa logout berhasil dan status kode 200. Tujuan dari fungsi ini adalah untuk mencabut token akses yang digunakan sehingga token tersebut tidak lagi valid dan tidak dapat digunakan untuk mengakses sumber daya terproteksi.
+
 Fungsi 'check_if_token_is_revoked()' adalah fungsi yang digunakan untuk menentukan apakah suatu token akses ditarik atau dicabut. Fungsi ini ditentukan dengan '@jwt.token_in_blocklist_loader' untuk JWT manager yang digunakan dalam aplikasi. Di dalam fungsi, kita mengambil "jti" (JWT ID) dari JWT payload dan mencari token dengan "jti" tersebut dalam database menggunakan BlacklistToken. Jika token ditemukan, berarti token tersebut telah ditarik dan fungsi ini mengembalikan nilai True. Jika token tidak ditemukan, berarti token masih valid dan fungsi ini mengembalikan nilai False. Dengan menggunakan fungsi ini, kita dapat memastikan bahwa token akses yang ditarik atau dicabut akan dianggap tidak valid saat melakukan verifikasi otentikasi.
 
