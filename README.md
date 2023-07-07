@@ -248,3 +248,97 @@ class Users(db.Model):
 Pertama module 'db' diimport dari 'app.extension'. Kelas 'Users' didefinisikan sebagai subclass dari 'db.Model' yang merupakan kelas dasar untuk menggunakan SQLAlchemy dalam Flask. Kelas ini memiliki beberapa kolom dalam tabel database, yaitu 'id', 'name', 'email', dan 'password'. 'tasks = db.relationship('Tasks', back_populates = 'user')' digunakan untuk mendefinikan relasi antara tabel 'tasks' dan 'users', yang berarti 'users' terhubung 'tasks'.
 
 Method 'serialize(self)' digunakan untuk mengembalikan representasi serialisasi objek dalam bentuk dictionary. Dictionary berisi pasangan kunci yang mewakili atribut objek, yaitu 'id', 'name', dan 'email'. Hal ini dilakukan untuk mengubah ke format yang lebih mudah dikirim.
+
+### Code 7
+Code ini berada di app/static/css/login.css
+```
+.glass-background{
+background: rgba(0, 0, 0, 0.29);
+border-radius: 16px;
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(3.3px);
+-webkit-backdrop-filter: blur(3.3px);
+border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.bg-images{
+    background-image: url("../images/black-bg2.png"); 
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+}
+
+.btn-circle-md {
+    width: 80px;
+    height: 80px;
+    border-radius: 50px;
+    font-size: 2.5rem;
+    text-align: center;
+}
+```
+Code ini digunakan untuk memodifikasi elemen-elemen yang digunakan pada .html.
+
+### Code 8
+Code ini berada di app/static/js/script-login.js
+```
+const formLogin = document.getElementById("form-login")
+const API_HOST = 'http://127.0.0.1:5000/api'
+```
+'const formLogin' dan 'const API_HOST' digunakan untuk mendeklarasikan variabel formLogin yang mereferensikan elemen dengan id "form-login". Kemudian, konstanta API_HOST diatur dengan URL host API yang akan digunakan untuk mengirim permintaan ke server.
+```
+window.onload = function() {
+```
+Fungsi dijalankan ketika halaman telah selesai dimuat. Seluruh kode yang ada di dalam fungsi ini akan dieksekusi setelah elemen halaman selesai dimuat.
+```
+formLogin.addEventListener('submit', (e) =>{
+e.preventDefault();
+```
+Event listener yang akan merespons saat formulir login di-submit. Saat formulir di-submit, event listener ini mencegah perilaku default (refresh halaman) menggunakan e.preventDefault().
+```
+const xhr = new XMLHttpRequest()
+const url = API_HOST + "/auth/login"
+```
+Variabel 'xhr' dideklarasikan sebagai objek 'XMLHttpRequest' yang digunakan untuk membuat permintaan HTTP ke server. Variabel 'url' diatur dengan URL lengkap untuk rute login pada API.
+```
+const email = document.getElementById("email").value
+const password = document.getElementById("password").value
+```
+Nilai email dan password diambil dari elemen dengan id "email" dan "password" menggunakan 'getElementById().value'.
+```
+const toastTrigger = document.getElementById("liveToast");
+const toastMsg = document.getElementById("toast-body");
+toastMsg.innerHTML = "email atau password salah"
+const toast = new bootstrap.Toast(toastTrigger)
+
+if (email == '' || password == ''){
+    return toast.show()
+        }
+```
+Ini adalah bagian yang menangani validasi dan menampilkan pesan kesalahan jika email atau password kosong. Jika email atau password kosong, maka sebuah toast (pemberitahuan sementara) akan ditampilkan menggunakan Bootstrap.
+```
+const data = JSON.stringify({
+    email: email,
+    password: password,
+})
+```
+Objek data dihasilkan dengan mengkonversi email dan password ke dalam format JSON menggunakan JSON.stringify().
+```
+xhr.open("POST", url, true)
+xhr.setRequestHeader('Content-Type', 'application/json;charset=utf-8')
+xhr.onreadystatechange = function(){
+...
+xhr.send(data)
+```
+Ini adalah bagian yang menyiapkan dan mengirim permintaan POST menggunakan objek 'xhr'. 'xhr.open()' digunakan untuk mengkonfigurasi permintaan dengan metode 'POST' dan URL yang telah ditentukan sebelumnya. Kemudian, 'xhr.setRequestHeader()' digunakan untuk mengatur header permintaan dengan tipe konten yang sesuai. 'xhr.onreadystatechange' adalah fungsi yang akan dipanggil saat status permintaan berubah. Terakhir, 'xhr.send()' mengirimkan data dalam format JSON ke server.
+```
+if(this.status == 200){
+    const response = JSON.parse(this.response)
+    localStorage.setItem('access_token', response.access_token)
+    window.location.href = "http://127.0.0.1:5000/"
+} else {
+    toastMsg.innerHTML = this.response
+    toast.show()
+}
+```
+Ini adalah bagian yang menangani respons dari server setelah permintaan login dikirim. Jika status permintaan adalah 200 (OK), respons JSON dari server akan diuraikan menggunakan 'JSON.parse()'. Akses token yang diterima dari respons akan disimpan dalam penyimpanan lokal (localStorage) dengan nama 'access_token'. Selain itu, jika status permintaan bukan 200, pesan kesalahan dari server akan ditampilkan pada toast dan ditampilkan kepada pengguna.
