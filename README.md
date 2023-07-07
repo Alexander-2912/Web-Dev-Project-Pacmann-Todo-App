@@ -525,6 +525,7 @@ xhr.onreadystatechange = function(){
             const article = document.createElement("article")
             const badgeDelete = document.createElement('button')
             const badgeEdit = document.createElement('button')
+            const badgeDone = document.createElement('button')
             const h4 = document.createElement('h4')
             const p = document.createElement('p')
 
@@ -554,11 +555,22 @@ xhr.onreadystatechange = function(){
             badgeEdit.setAttribute("data-bs-target", "#modalEdit")
             
             badgeEdit.appendChild(document.createTextNode("Edit"))
+
+            badgeDone.setAttribute('class', 'badge bg-success')
+            badgeDone.setAttribute("href", "#")
+            badgeDone.setAttribute("data-title", task.title)
+            badgeDone.setAttribute('data-description', task.description)
+            badgeDone.setAttribute("data-id", task.id)
+            badgeDone.setAttribute("data-bs-toggle", "modal")
+            badgeDone.setAttribute("data-bs-target", "#modalDone")
             
+            badgeDone.appendChild(document.createTextNode("Done"))
+
             article.appendChild(h4)
             article.appendChild(p)
             article.appendChild(badgeDelete)
             article.appendChild(badgeEdit)
+            article.appendChild(badgeDone)
 
             if(task.status == true){
                 article.setAttribute('style', 'text-decoration:line-through')
