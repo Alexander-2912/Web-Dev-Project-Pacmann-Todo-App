@@ -835,6 +835,8 @@ Kode ini mendefinisikan fungsi create_task() sebagai penangan rute HTTP. Fungsi 
 @taskBp.route('<int:id>', methods=['PUT'], strict_slashes = False)
 @jwt_required(locations=["headers"])
 ```
+Kode ini mendefinisikan rute HTTP dengan metode PUT dan path 'int:id' pada Blueprint 'task'. <int:id> menunjukkan bahwa kita mengharapkan parameter id dengan tipe data integer dalam path. Ketika rute ini diakses dengan metode PUT, fungsi yang terdekorasi di bawahnya akan dieksekusi. Kode ini mengaplikasikan autentikasi JWT pada rute tersebut. Hanya pengguna yang memiliki JWT yang valid dan terkait dengan otorisasi yang sesuai yang dapat mengakses rute ini. Lokasi JWT diatur sebagai header.
+```
 def update_task(id):
     current_user_id = get_jwt_identity()
 
@@ -843,7 +845,9 @@ def update_task(id):
     description = data['description']
 
     task = Tasks.query.filter_by(id=id).first()
-
+```
+Kode ini menggunakan get_jwt_identity() untuk mendapatkan id pengguna dari JWT yang terautentikasi. Selanjutnya, data dari permintaan HTTP dalam format JSON diambil menggunakan request.get_json(). Data ini kemudian digunakan untuk mengambil nilai 'title' dan 'description' dari permintaan. Kode ini menggunakan Tasks.query.filter_by(id=id).first() untuk mengambil tugas dari database berdasarkan id yang diberikan dalam path rute.
+```
     if not task:
         return jsonify({"message": "Task Not Found!"}), 404
     
@@ -862,5 +866,66 @@ def update_task(id):
         "success": True,
         "message": "Task successfully updated!"
     }), 200
-
 ```
+Jika tugas tidak ditemukan, maka respons JSON dengan pesan "Task Not Found!" dikembalikan dengan kode status 404 (Not Found). Kode ini memeriksa apakah nilai 'title' atau 'description' kosong. Jika salah satu nilai tersebut kosong, maka respons JSON dengan pesan kesalahan "Incomplete data" dikembalikan dengan kode status 422 (Unprocessable Entity). Selain itu, juga dilakukan pengecekan apakah pengguna yang meminta pembaruan adalah pemilik tugas. Jika bukan, maka respons JSON dengan pesan "Unauthorized action" dikembalikan dengan kode status 422 (Unprocessable Entity). Kode ini mengubah nilai 'title' dan 'description' dari objek tugas yang ditemukan sebelumnya. Perubahan ini kemudian disimpan ke dalam database menggunakan db.session.commit(). Kode ini mengembalikan respons JSON yang berisi pesan sukses "Task successfully updated!" dalam format JSON. Kode status 200 (OK) digunakan untuk menandakan bahwa pembaruan tugas berhasil.
+```
+@taskBp.route('/status/<int:id>', methods=['GET'], strict_slashes = False)
+@jwt_required(locations=['headers'])
+```
+Kode ini mendefinisikan rute HTTP dengan metode GET dan path '/status/int:id' pada Blueprint 'task'. <int:id> menunjukkan bahwa kita mengharapkan parameter id dengan tipe data integer dalam path. Ketika rute ini diakses dengan metode GET, fungsi yang terdekorasi di bawahnya akan dieksekusi. Kode ini mengaplikasikan autentikasi JWT pada rute tersebut. Hanya pengguna yang memiliki JWT yang valid dan terkait dengan otorisasi yang sesuai yang dapat mengakses rute ini. Lokasi JWT diatur sebagai header.
+```
+def update_status(id):
+    current_user_id = get_jwt_identity()
+    task = Tasks.query.filter_by(id=id).first()
+
+    if not task:
+        return jsonify({'message': 'task not found'}), 422
+
+    data = request.get_json()
+    status = data.get('status')
+    task.status = status
+    db.session.commit()
+    return jsonify({
+        "success": True,
+        "message": "status successfully updated"
+    }), 200
+```
+Kode ini mendefinisikan fungsi update_status() sebagai penangan rute HTTP. Fungsi ini akan dieksekusi ketika rute '/status/int:id' dengan metode GET diakses. Kode ini menggunakan get_jwt_identity() untuk mendapatkan id pengguna dari JWT yang terautentikasi. Selanjutnya, tugas dari database diambil berdasarkan id yang diberikan dalam path rute menggunakan Tasks.query.filter_by(id=id).first(). Kode ini memeriksa apakah tugas ditemukan dalam database. Jika tugas tidak ditemukan, maka respons JSON dengan pesan "task not found" dikembalikan dengan kode status 422 (Unprocessable Entity). Kode ini menggunakan request.get_json() untuk mendapatkan data dari permintaan dalam format JSON. Selanjutnya, nilai 'status' diambil dari data JSON menggunakan data.get('status'). Status tugas kemudian diperbarui dengan nilai yang diperoleh, dan perubahan ini disimpan ke dalam database menggunakan db.session.commit(). Kode ini mengembalikan respons JSON yang berisi pesan sukses "status successfully updated" dalam format JSON. Kode status 200 (OK) digunakan untuk menandakan bahwa pembaruan status tugas berhasil.
+```
+@taskBp.route('<int:id>', methods=['DELETE'], strict_slashes = False)
+@jwt_required(locations=["headers"])
+```
+Kode ini mendefinisikan rute HTTP dengan metode DELETE dan path 'int:id' pada Blueprint 'task'. <int:id> menunjukkan bahwa kita mengharapkan parameter id dengan tipe data integer dalam path. Ketika rute ini diakses dengan metode DELETE, fungsi yang terdekorasi di bawahnya akan dieksekusi. Kode ini mengaplikasikan autentikasi JWT pada rute tersebut. Hanya pengguna yang memiliki JWT yang valid dan terkait dengan otorisasi yang sesuai yang dapat mengakses rute ini. Lokasi JWT diatur sebagai header.
+```
+def delete_task(id):
+    task = Tasks.query.filter_by(id=id).first()
+    current_user_id = get_jwt_identity()
+```
+Kode ini mendefinisikan fungsi delete_task() sebagai penangan rute HTTP. Fungsi ini akan dieksekusi ketika rute 'int:id' dengan metode DELETE diakses. Kode ini menggunakan Tasks.query.filter_by(id=id).first() untuk mendapatkan tugas dari database berdasarkan id yang diberikan dalam path rute. Kode ini menggunakan get_jwt_identity() untuk mendapatkan id pengguna saat ini dari JWT yang terautentikasi.
+```
+    if not task:
+        return jsonify({"message": "Task Not Found!"}), 404
+    
+    if current_user_id != task.user_id:
+        return jsonify({"message": "Unauthorized action"}), 422
+    
+    db.session.delete(task)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Task successfully deleted!"
+    })
+```
+Kode ini memeriksa apakah tugas ditemukan dalam database. Jika tugas tidak ditemukan, maka respons JSON dengan pesan "Task Not Found!" dikembalikan dengan kode status 404 (Not Found). Kode ini memeriksa apakah id pengguna saat ini sesuai dengan id pengguna yang memiliki tugas. Jika tidak sesuai, maka respons JSON dengan pesan "Unauthorized action" dikembalikan dengan kode status 422 (Unprocessable Entity). Kode ini menggunakan db.session.delete(task) untuk menghapus tugas dari sesi database. Perubahan ini kemudian disimpan ke dalam database menggunakan db.session.commit(). Kode ini mengembalikan respons JSON yang berisi pesan sukses "Task successfully deleted!" dalam format JSON. Kode status default 200 (OK) digunakan untuk menandakan bahwa penghapusan tugas berhasil.
+
+### Code 14
+Code ini berada di app/user/__init__.py
+```
+from flask import Blueprint
+userBp = Blueprint('user', __name__)
+from app.user import routes
+```
+Kode ini mengimpor modul Blueprint dari pustaka Flask. Blueprint adalah objek yang digunakan untuk mengorganisir rute, fungsi, dan templat yang terkait dalam aplikasi Flask. Kode ini membuat objek Blueprint dengan nama 'user'. Parameter pertama adalah nama Blueprint, dan parameter kedua 'name' digunakan untuk menentukan nama modul Blueprint saat ini. Kode ini mengimpor modul 'routes' yang terkait dengan rute pengguna. Modul 'routes' kemungkinan besar berisi definisi rute HTTP untuk operasi yang terkait dengan pengguna, seperti registrasi, masuk, profil, dan lainnya.
+
+### Code 15
