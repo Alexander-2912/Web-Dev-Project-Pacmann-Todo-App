@@ -328,7 +328,7 @@ xhr.open("POST", url, true)
 xhr.setRequestHeader('Content-Type', 'application/json;charset=utf-8')
 xhr.onreadystatechange = function(){
 ...
-xhr.send(data)
+xhr.send(data)}
 ```
 Ini adalah bagian yang menyiapkan dan mengirim permintaan POST menggunakan objek 'xhr'. 'xhr.open()' digunakan untuk mengkonfigurasi permintaan dengan metode 'POST' dan URL yang telah ditentukan sebelumnya. Kemudian, 'xhr.setRequestHeader()' digunakan untuk mengatur header permintaan dengan tipe konten yang sesuai. 'xhr.onreadystatechange' adalah fungsi yang akan dipanggil saat status permintaan berubah. Terakhir, 'xhr.send()' mengirimkan data dalam format JSON ke server.
 ```
@@ -342,3 +342,73 @@ if(this.status == 200){
 }
 ```
 Ini adalah bagian yang menangani respons dari server setelah permintaan login dikirim. Jika status permintaan adalah 200 (OK), respons JSON dari server akan diuraikan menggunakan 'JSON.parse()'. Akses token yang diterima dari respons akan disimpan dalam penyimpanan lokal (localStorage) dengan nama 'access_token'. Selain itu, jika status permintaan bukan 200, pesan kesalahan dari server akan ditampilkan pada toast dan ditampilkan kepada pengguna.
+
+### Code 10
+Code ini berada di app/static/js/script-register.js
+```
+const formRegistration = document.getElementById("form-registration")
+const API_HOST = 'http://127.0.0.1:5000/api'
+```
+Kode ini mendeklarasikan variabel 'formRegistration' yang mereferensikan elemen dengan id "form-registration". Kemudian, konstanta 'API_HOST' diatur dengan URL host API yang akan digunakan untuk mengirim permintaan ke server.
+```
+formRegistration.addEventListener('submit', (e) =>{
+    e.preventDefault();
+```
+Ini adalah event listener yang akan merespons saat formulir registrasi di-submit. Saat formulir di-submit, event listener ini mencegah perilaku default (refresh halaman) menggunakan 'e.preventDefault()'.
+```
+const xhr = new XMLHttpRequest();
+const url = API_HOST + "/auth/register"
+```
+Variabel 'xhr' dideklarasikan sebagai objek 'XMLHttpRequest' yang digunakan untuk membuat permintaan HTTP ke server. Variabel 'url' diatur dengan URL lengkap untuk rute registrasi pada API.
+```
+const name = document.getElementById("nama-lengkap").value
+const email = document.getElementById("email").value
+const password = document.getElementById("password").value
+const confirmPassword = document.getElementById("confirm-password").value
+```
+Nilai name, email, password, dan confirmPassword diambil dari elemen dengan id yang sesuai menggunakan 'getElementById().value'.
+```
+const toastTrigger = document.getElementById("liveToast");
+const toastMsg = document.getElementById("toast-body");
+```
+Variabel toastTrigger dan toastMsg mereferensikan elemen yang akan digunakan untuk menampilkan pesan kesalahan atau konfirmasi menggunakan toast.
+```
+if(!name || !email || !password || !confirmPassword){
+    toastMsg.innerHTML = "Form harus diisi semua"
+    const toast = new bootstrap.Toast(toastTrigger)
+    return toast.show()
+}
+if(password != confirmPassword){
+    toastMsg.innerHTML = "password yang dimasukkan tidak cocok"
+    return toast.show()
+}
+```
+Yang pertama adalah bagian yang menangani validasi form registrasi. Jika salah satu field tidak diisi, maka pesan kesalahan akan ditampilkan pada toast dan halaman tidak akan dikirim ke server. Yang kedua adalah bagian yang menangani validasi konfirmasi password. Jika password dan konfirmasi password tidak cocok, maka pesan kesalahan akan ditampilkan pada toast dan halaman tidak akan dikirim ke server.
+```
+const data = JSON.stringify({
+    name: name,
+    email: email,
+    password: password,
+})
+```
+Objek data dihasilkan dengan mengkonversi name, email, dan password ke dalam format JSON menggunakan 'JSON.stringify()'.
+```
+xhr.open('POST', url, true)
+xhr.setRequestHeader('Content-Type', 'application/json;charset=utf-8')
+xhr.onreadystatechange = function(){
+...
+xhr.send(data)}
+```
+Ini adalah bagian yang menyiapkan dan mengirim permintaan 'POST' menggunakan objek 'xhr'. 'xhr.open()' digunakan untuk mengkonfigurasi permintaan dengan metode 'POST' dan URL yang telah ditentukan sebelumnya. Kemudian, 'xhr.setRequestHeader()' digunakan untuk mengatur header permintaan dengan tipe konten yang sesuai. 'xhr.onreadystatechange' adalah fungsi yang akan dipanggil saat status permintaan berubah. Terakhir, 'xhr.send()' mengirimkan data dalam format JSON ke server.
+```
+if(this.status == 200){
+    toastMsg.innerHTML = "User Registration Success"
+    const toast = new bootstrap.Toast(toastTrigger)
+    toast.show()
+    window.location.href = "http://127.0.0.1:5000/auth/login"
+} else{
+    toastMsg.innerHTML = this.response
+    toast.show()
+}
+```
+Ini adalah bagian yang menangani respons dari server setelah permintaan registrasi dikirim. Jika status permintaan adalah 200 (OK), maka pesan konfirmasi akan ditampilkan pada toast dan pengguna akan diarahkan ke halaman login. Jika status permintaan bukan 200, pesan kesalahan dari server akan ditampilkan pada toast dan ditampilkan kepada pengguna.
