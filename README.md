@@ -928,3 +928,178 @@ from app.user import routes
 Kode ini mengimpor modul Blueprint dari pustaka Flask. Blueprint adalah objek yang digunakan untuk mengorganisir rute, fungsi, dan templat yang terkait dalam aplikasi Flask. Kode ini membuat objek Blueprint dengan nama 'user'. Parameter pertama adalah nama Blueprint, dan parameter kedua 'name' digunakan untuk menentukan nama modul Blueprint saat ini. Kode ini mengimpor modul 'routes' yang terkait dengan rute pengguna. Modul 'routes' kemungkinan besar berisi definisi rute HTTP untuk operasi yang terkait dengan pengguna, seperti registrasi, masuk, profil, dan lainnya.
 
 ### Code 15
+Code ini berada di app/user/routes.py
+```
+@userBp.route('/', methods=['GET'], strict_slashes = False)
+def get_all_users():
+    limit = request.args.get('limit', 10)
+    
+    if type(limit) is not int:
+        return jsonify({
+            "message": "Invalid Parameter"
+        }), 400
+    
+    users = db.session.execute(db.select(Users).limit(limit)).scalars()
+
+    print(users)
+```
+Kode ini mendefinisikan rute '/' dengan metode HTTP GET pada Blueprint 'user'. Rute ini akan menangani permintaan untuk mendapatkan semua pengguna. Kode ini menggunakan objek request untuk mengambil nilai parameter 'limit' dari URL. Jika parameter tidak ada, maka akan digunakan nilai default 10. Kode ini memeriksa tipe data parameter 'limit'. Jika tipe datanya bukan integer, maka akan dikembalikan respons JSON dengan pesan error "Invalid Parameter" dan kode status 400. Kode ini menggunakan objek db.session untuk melakukan eksekusi query yang mengambil daftar pengguna dari tabel 'Users' dengan batasan jumlah data sesuai nilai 'limit'. Hasilnya adalah objek hasil query yang akan diperlakukan sebagai iterabel.
+```
+    result = []
+    for user in users:
+        result.append(user.serialize())
+
+    return jsonify({
+        "success": True,
+        "data": result
+    }), 200
+```
+Kode ini melakukan iterasi melalui setiap objek pengguna dalam hasil query dan mengubahnya menjadi bentuk yang dapat di-serialize. Asumsinya adalah setiap objek pengguna memiliki metode serialize() yang mengembalikan representasi serialisasi data pengguna. Kode ini mengembalikan respons JSON yang berisi data pengguna yang telah di-serialize. Respon memiliki atribut "success" yang bernilai True dan atribut "data" yang berisi daftar pengguna yang telah di-serialize. Kode status 200 menunjukkan bahwa permintaan berhasil dilakukan.
+```
+@userBp.route('/', methods=['POST'], strict_slashes = False)
+def create_user():
+    data = request.get_json()
+    name = data['name']
+    email = data['email']
+    password = data['password']
+```
+Kode ini mendefinisikan rute '/' dengan metode HTTP POST pada Blueprint 'user'. Rute ini akan menangani permintaan untuk membuat pengguna baru. Kode ini menggunakan objek request untuk mendapatkan data JSON yang dikirim dengan permintaan POST. Kode ini mengambil nilai 'name', 'email', dan 'password' dari data JSON yang dikirim dengan permintaan. Asumsinya adalah data JSON memiliki kunci yang sesuai dengan nama kolom pada tabel pengguna.
+```
+    if not name or not email or not password:
+        return jsonify({
+            'message': "Incomplete data"
+        }), 422
+    
+    new_user = Users(name = name, email = email, password = password)
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "data": new_user.serialize()
+    }), 200
+```
+Kode ini memeriksa apakah semua nilai yang diperlukan ('name', 'email', dan 'password') telah disediakan. Jika ada nilai yang kosong, maka akan dikembalikan respons JSON dengan pesan error "Incomplete data" dan kode status 422. Kode ini membuat objek pengguna baru dengan menggunakan nilai-nilai yang diterima dari permintaan. Asumsinya adalah terdapat kelas Users yang menggambarkan model pengguna dan memiliki konstruktor yang menerima nilai-nilai tersebut. Kode ini menggunakan objek db.session untuk menambahkan objek pengguna baru ke dalam sesi database dan melakukan commit untuk menyimpan perubahan ke dalam database. Kode ini mengembalikan respons JSON yang berisi data pengguna baru yang telah di-serialize. Respon memiliki atribut "success" yang bernilai True dan atribut "data" yang berisi data pengguna baru yang telah di-serialize. Kode status 200 menunjukkan bahwa permintaan berhasil dilakukan.
+```
+@userBp.route('<int:id>', methods=['PUT'], strict_slashes = False)
+def update_user(id):
+    data = request.get_json()
+    name = data['name']
+    email = data['email']
+    password = data['password']
+
+    user = Users.query.filter_by(id=id).first()
+```
+Kode ini mendefinisikan rute dengan pola URL <int:id>, yang berarti akan menangani permintaan PUT untuk memperbarui pengguna dengan ID tertentu. Blueprint yang digunakan adalah userBp. Kode ini menggunakan objek request untuk mendapatkan data JSON yang dikirim dengan permintaan PUT. Kode ini mengambil nilai 'name', 'email', dan 'password' dari data JSON yang dikirim dengan permintaan. Asumsinya adalah data JSON memiliki kunci yang sesuai dengan nama kolom pada tabel pengguna. Kode ini menggunakan metode filter_by pada kelas Users (asumsi kelas ini merupakan model pengguna) untuk mencari pengguna dengan ID yang sesuai dengan nilai id yang diberikan. Jika pengguna tidak ditemukan, maka akan dikembalikan respons JSON dengan pesan error "User Not Found!" dan kode status 404.
+```
+    if not user:
+        return jsonify({
+            "message": 'User Not Found!'
+        }), 404
+    
+    if not name or not email or not password:
+        return jsonify({
+            'message': "Incomplete data"
+        }), 422
+    
+    user.name = name
+    user.email = email
+    user.password = password
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "User successfully updated"
+    }), 200
+```
+Kode ini memeriksa apakah semua nilai yang diperlukan ('name', 'email', dan 'password') telah disediakan. Jika ada nilai yang kosong, maka akan dikembalikan respons JSON dengan pesan error "Incomplete data" dan kode status 422. Kode ini memperbarui nilai-nilai pengguna yang ditemukan berdasarkan ID. Nilai-nilai tersebut diubah sesuai dengan nilai yang diterima dari permintaan. Setelah itu, perubahan tersebut dicommit ke dalam database menggunakan db.session.commit(). Kode ini mengembalikan respons JSON dengan atribut "success" yang bernilai True dan atribut "message" yang menyatakan bahwa pengguna telah berhasil diperbarui. Kode status 200 menunjukkan bahwa permintaan berhasil dilakukan.
+```
+@userBp.route('<int:id>', methods=['DELETE'], strict_slashes = False)
+def delete_user(id):
+    user = Users.query.filter_by(id=id).first()
+```
+Kode ini mendefinisikan rute dengan pola URL <int:id>, yang berarti akan menangani permintaan DELETE untuk menghapus pengguna dengan ID tertentu. Blueprint yang digunakan adalah userBp. Kode ini menggunakan metode filter_by pada kelas Users (asumsi kelas ini merupakan model pengguna) untuk mencari pengguna dengan ID yang sesuai dengan nilai id yang diberikan. Jika pengguna tidak ditemukan, maka akan dikembalikan respons JSON dengan pesan error "User Not Found!" dan kode status 404.
+    if not user:
+        return jsonify({
+            "message": 'User Not Found!'
+        }), 404
+    
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "User successfully deleted!"
+    }), 200
+```
+Kode ini menghapus pengguna yang ditemukan dari database menggunakan db.session.delete(user). Setelah itu, perubahan tersebut dicommit ke dalam database menggunakan db.session.commit(). Kode ini mengembalikan respons JSON dengan atribut "success" yang bernilai True dan atribut "message" yang menyatakan bahwa pengguna telah berhasil dihapus. Kode status 200 menunjukkan bahwa permintaan berhasil dilakukan.
+```
+
+@userBp.route('<int:id>/tasks', methods=['GET'], strict_slashes = False)
+def get_user_task(id):
+    limit = request.args.get('limit', 10)
+    
+    if type(limit) is not int:
+        return jsonify({
+            "message": "Invalid Parameter"
+        }), 400
+```
+Kode ini mendefinisikan rute dengan pola URL <int:id>/tasks, yang berarti akan menangani permintaan GET untuk mendapatkan tugas-tugas yang terkait dengan pengguna berdasarkan ID pengguna. Blueprint yang digunakan adalah userBp. Kode ini menggunakan objek request dari Flask untuk mengambil nilai parameter limit dari argumen URL. Jika parameter tidak ditemukan, maka nilai default yang digunakan adalah 10. Kode ini memeriksa apakah tipe data limit adalah integer. Jika bukan, maka akan dikembalikan respons JSON dengan pesan error "Invalid Parameter" dan kode status 400.
+```
+    tasks = Tasks.query.filter_by(user_id = id).all()
+
+    if not tasks:
+        return jsonify({"message": "Tasks Not Found!"}), 404
+    
+    result = []
+    for task in tasks:
+        result.append(task.serialize())
+
+    return jsonify({
+        "success": True,
+        "data": result
+    }), 200
+```
+Kode ini menggunakan metode filter_by pada kelas Tasks (asumsi kelas ini merupakan model tugas) untuk mencari tugas-tugas yang memiliki user_id sesuai dengan nilai id yang diberikan. Hasilnya disimpan dalam variabel tasks. Kode ini memeriksa apakah tasks kosong. Jika ya, maka akan dikembalikan respons JSON dengan pesan error "Tasks Not Found!" dan kode status 404. Kode ini mengiterasi setiap tugas dalam tasks dan mengonversi setiap tugas menjadi format serialisasi menggunakan metode serialize(). Hasilnya disimpan dalam variabel result. Selanjutnya, dilakukan pengembalian respons JSON yang berisi atribut "success" yang bernilai True dan atribut "data" yang berisi tugas-tugas yang telah di-serialize. Kode status 200 menunjukkan bahwa permintaan berhasil dilakukan.
+
+### Code 16
+Code ini berada di app/__init__.py
+```
+def create_app(config_class = Config):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+    db.init_app(app)
+    migrate.init_app(app, db)
+
+    jwt.init_app(app)
+```
+Kode ini membuat objek Flask dengan nama aplikasi yang sesuai dengan modul saat ini. Kode ini mengambil konfigurasi aplikasi dari kelas config_class. Kelas konfigurasi ini biasanya digunakan untuk mengatur variabel-variabel konfigurasi, seperti pengaturan database, kunci rahasia, atau pengaturan lain yang diperlukan oleh aplikasi. Kode ini menginisialisasi ekstensi Flask-SQLAlchemy dengan objek aplikasi app. Ekstensi ini digunakan untuk berinteraksi dengan database menggunakan ORM SQLAlchemy. Kode ini menginisialisasi ekstensi Flask-Migrate dengan objek aplikasi app dan objek database db. Ekstensi ini digunakan untuk melakukan migrasi skema database. 
+```
+    jwt.init_app(app)
+    
+    app.register_blueprint(taskBp, url_prefix='/api/tasks')
+    app.register_blueprint(userBp, url_prefix='/api/users')
+    app.register_blueprint(authBp, url_prefix='/api/auth')
+    app.register_blueprint(frontendBp, url_prefix = "/")
+
+    return app
+```
+Kode ini menginisialisasi ekstensi Flask-JWT-Extended dengan objek aplikasi app. Ekstensi ini digunakan untuk mengimplementasikan otentikasi dan otorisasi berbasis JWT (JSON Web Tokens). Kode ini mendaftarkan blueprint untuk setiap bagian aplikasi, seperti tugas (tasks), pengguna (users), otentikasi (auth), dan tampilan frontend. Blueprint digunakan untuk mengatur rute dan logika terkait untuk setiap bagian aplikasi secara terpisah. Kode ini mengembalikan objek aplikasi Flask yang telah dikonfigurasi dan siap digunakan sebagai aplikasi web yang berjalan.
+
+### Code 17
+Code ini berada di app/extensions.py
+```
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
+
+db = SQLAlchemy()
+migrate = Migrate()
+jwt = JWTManager()
+```
+db = SQLAlchemy(): Menginisialisasi objek SQLAlchemy yang digunakan untuk berinteraksi dengan database menggunakan ORM (Object-Relational Mapping). SQLAlchemy mempermudah pemodelan data dan kueri database dalam aplikasi Flask.
+
+migrate = Migrate(): Menginisialisasi objek Migrate yang digunakan untuk melakukan migrasi skema database. Flask-Migrate bekerja dengan SQLAlchemy untuk mengelola versi skema dan menerapkan perubahan skema yang terkait dengan model aplikasi.
+
+jwt = JWTManager(): Menginisialisasi objek JWTManager yang digunakan untuk mengelola otentikasi dan otorisasi berbasis JWT (JSON Web Tokens). Flask-JWT-Extended menyediakan fitur-fitur yang kuat untuk mengamankan rute-rute aplikasi dengan token dan melaksanakan logika otorisasi yang fleksibel.
