@@ -805,7 +805,6 @@ return jsonify({
 ```
 Kode ini memeriksa apakah tugas dengan ID yang diberikan ditemukan dalam database. Jika tidak ditemukan, maka respons JSON dengan pesan kesalahan "task not found" dikembalikan dengan kode status 404 (Not Found). Fungsi task.serialize() digunakan untuk mengonversi objek tugas menjadi format JSON. Kode ini mengembalikan respons JSON yang berisi tugas yang ditemukan dalam format JSON. Kode status 200 (OK) digunakan untuk menandakan bahwa permintaan berhasil
 ```
-```
 @taskBp.route('/', methods=['POST'], strict_slashes = False)
 @jwt_required(locations=["headers"])
 ```
