@@ -412,3 +412,455 @@ if(this.status == 200){
 }
 ```
 Ini adalah bagian yang menangani respons dari server setelah permintaan registrasi dikirim. Jika status permintaan adalah 200 (OK), maka pesan konfirmasi akan ditampilkan pada toast dan pengguna akan diarahkan ke halaman login. Jika status permintaan bukan 200, pesan kesalahan dari server akan ditampilkan pada toast dan ditampilkan kepada pengguna.
+
+### Code 11
+Code ini berada di app/static/js/script-todo.js
+```
+const API_HOST = "http://127.0.0.1:5000/api"
+```
+Variabel 'API_HOST' diatur dengan URL host API yang akan digunakan untuk mengirim permintaan ke server.
+```
+function dragStart(event){
+    event.dataTransfer.setData("todo", event.target.id)
+}
+```
+Fungsi 'dragStart()' dijalankan saat operasi seret dimulai pada elemen target. Ini mengatur data yang akan dikirimkan selama operasi seret menggunakan metode 'setData()' pada objek 'dataTransfer' pada event.
+```
+function drop(event){
+    event.preventDefault();
+    const data = event.dataTransfer.getData("todo")
+    event.target.appendChild(document.getElementById(data))
+    const dataId = event.srcElement.lastChild.id
+    checkStatus(dataId)
+}
+```
+Fungsi 'drop()' dijalankan saat elemen yang sedang dijatuhkan di atas elemen target. Ini mencegah perilaku default yang biasanya terjadi saat menjatuhkan elemen. Kemudian, fungsi ini mengambil data yang diset pada operasi seret menggunakan metode 'getData()' pada objek 'dataTransfer'. Selanjutnya, elemen yang dijatuhkan ditambahkan sebagai anak pada elemen target menggunakan metode 'appendChild()'. Terakhir, fungsi 'checkStatus()' dipanggil dengan menggunakan ID elemen terakhir yang ditambahkan untuk memeriksa dan memperbarui status tugas terkait.
+```
+function allowDrop(event){
+    event.preventDefault();
+}
+```
+Fungsi allowDrop() mencegah perilaku default yang biasanya terjadi saat menjatuhkan elemen pada area target. Ini mencegah browser melakukan tindakan default yang tidak diinginkan.
+```
+function updateStatus(id, status){
+    const xhr = new XMLHttpRequest()
+    const url = API_HOST + '/tasks/status' + id
+    const data = JSON.stringify({
+        status: !status
+    })
+```
+Fungsi ini menerima dua parameter: 'id' dan 'status'. Variabel 'xhr' dideklarasikan sebagai objek 'XMLHttpRequest' yang akan digunakan untuk membuat permintaan HTTP. url ditentukan dengan menggabungkan 'API_HOST' dan jalur '/tasks/status' dengan id tugas yang diberikan. Variabel 'data' diatur dengan objek JSON yang berisi 'status' yang dibalik dengan operator '!'.
+```
+xhr.open('PUT', url, true)
+xhr.setRequestHeader('Content-Type', 'application/json;charset=utf-8')
+xhr.setRequestHeader("Authorization", `Bearer ${localStorage.getItem('access_token')}`)
+```
+Pada bagian ini, metode 'open()' dipanggil pada objek 'xhr' untuk mengatur permintaan dengan metode PUT dan URL yang telah ditentukan. Kemudian, 'setRequestHeader()' digunakan untuk mengatur header permintaan. Header 'Content-Type' diatur sebagai 'application/json;charset=utf-8' untuk menunjukkan bahwa data dikirim dalam format JSON. Selain itu, header 'Authorization' diatur dengan token akses yang diperoleh dari penyimpanan lokal menggunakan localStorage.getItem('access_token'). Ini digunakan untuk mengotentikasi permintaan ke API.
+```
+xhr.onreadystatechange = function(){
+        if(this.readyState == 4 && this.status == 200){
+            location.reload()
+        }
+    }
+    xhr.send(data)
+}
+```
+Fungsi ini mengatur properti 'onreadystatechange' pada objek 'xhr' untuk menentukan fungsi yang akan dipanggil saat status permintaan berubah. Dalam hal ini, jika 'readyState' adalah 4 (permintaan selesai) dan 'status' adalah 200 (OK), maka 'location.reload()' dipanggil untuk me-refresh ulang halaman saat tugas berhasil diperbarui. Terakhir, permintaan dikirim dengan menggunakan metode 'send()' pada objek 'xhr' dan data yang dikirimkan adalah objek JSON yang telah di-stringify dalam variabel 'data'
+```
+function checkStatus(id){
+    const xhr = new XMLHttpRequest
+    const url = API_HOST + '/tasks/' + id
+
+    xhr.open('GET', url, true)
+    xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('access_token')}`)
+```
+Fungsi ini menerima satu parameter yaitu id. Variabel 'xhr' dideklarasikan sebagai objek 'XMLHttpRequest' yang akan digunakan untuk membuat permintaan HTTP. 'url' ditentukan dengan menggabungkan API_HOST dengan jalur '/tasks/' dan 'id' tugas yang diberikan. Metode 'open()' dipanggil pada objek 'xhr' untuk mengatur permintaan dengan metode GET dan URL yang telah ditentukan. Header 'Authorization' diatur dengan token akses yang diperoleh dari penyimpanan lokal menggunakan 'localStorage.getItem('access_token')'. Ini digunakan untuk mengotentikasi permintaan ke API.
+```
+xhr.onreadystatechange = function(){
+    if(this.readyState == 4 && this.status == 200){
+    const response = JSON.parse(this.response)
+
+    updateStatus(id, response.data.status)
+    }
+}
+return xhr.send()
+}
+```
+Fungsi ini mengatur properti 'onreadystatechange' pada objek 'xhr' untuk menentukan fungsi yang akan dipanggil saat status permintaan berubah. Dalam hal ini, jika 'readyState' adalah 4 (permintaan selesai) dan 'status' adalah 200 (OK), maka JSON.parse() digunakan untuk mengurai data respons menjadi objek JavaScript. Objek 'response' mengandung data tugas yang diperoleh dari API, termasuk status tugas. Kemudian, fungsi 'updateStatus()' dipanggil dengan menggunakan 'id' tugas dan status yang diperoleh dari respons API.
+```
+const todoItem = document.getElementById("todo-item")
+const doneItem = document.getElementById("done")
+```
+Variabel 'todoItem' dan 'doneItem' diatur untuk menyimpan referensi ke elemen HTML di mana tugas akan ditampilkan. 'todoItem' merepresentasikan daftar tugas yang belum selesai, sedangkan 'doneItem' merepresentasikan daftar tugas yang sudah selesai.
+```
+window.onload = function(e){
+    const token = localStorage.getItem('access_token')
+    if(!token){
+        window.location.href = "http://127.0.0.1:5000/auth/login"
+    }
+```
+Event 'window.onload' digunakan untuk menjalankan kode saat halaman web selesai dimuat. Pada bagian ini, kode memeriksa apakah ada token akses yang disimpan di penyimpanan lokal. Jika token tidak ada, pengguna akan dialihkan ke halaman login dengan mengubah 'window.location.href' menjadi URL halaman login yang sesuai.
+```
+const xhr = new XMLHttpRequest();
+const url = API_HOST +"/tasks"
+
+xhr.open("GET", url, true)
+xhr.setRequestHeader("Authorization", `Bearer ${token}`)
+xhr.onreadystatechange = function(){
+    if(this.readyState == 4 & this.status == 200){
+        const tasks = JSON.parse(this.response)
+        tasks['data'].forEach((task) => {
+            const article = document.createElement("article")
+            const badgeDelete = document.createElement('button')
+            const badgeEdit = document.createElement('button')
+            const h4 = document.createElement('h4')
+            const p = document.createElement('p')
+
+            h4.appendChild(document.createTextNode(task.title))
+            h4.setAttribute('id', task.id)
+            p.appendChild(document.createTextNode(task.description))
+
+            article.setAttribute('class', 'border p-3 drag')
+            article.setAttribute('ondragstart', "drag(event)")
+            article.setAttribute("draggable", "true")
+            article.setAttribute("id", task.id)
+
+            badgeDelete.setAttribute('class', 'badge bg-danger')
+            badgeDelete.setAttribute("href", "#")
+            badgeDelete.setAttribute("data-id", task.id)
+            badgeDelete.setAttribute("data-bs-toggle", "modal")
+            badgeDelete.setAttribute("data-bs-target", "#modalDelete")
+                
+            badgeDelete.appendChild(document.createTextNode("Delete"))
+
+            badgeEdit.setAttribute('class', 'badge bg-info')
+            badgeEdit.setAttribute("href", "#")
+            badgeEdit.setAttribute("data-title", task.title)
+            badgeEdit.setAttribute('data-description', task.description)
+            badgeEdit.setAttribute("data-id", task.id)
+            badgeEdit.setAttribute("data-bs-toggle", "modal")
+            badgeEdit.setAttribute("data-bs-target", "#modalEdit")
+            
+            badgeEdit.appendChild(document.createTextNode("Edit"))
+            
+            article.appendChild(h4)
+            article.appendChild(p)
+            article.appendChild(badgeDelete)
+            article.appendChild(badgeEdit)
+
+            if(task.status == true){
+                article.setAttribute('style', 'text-decoration:line-through')
+                doneItem.appendChild(article)
+            } else{
+                todoItem.appendChild(article)
+                }
+            })
+        }
+    }
+    xhr.send()
+}
+```
+Pada bagian ini, 'XMLHttpRequest' digunakan untuk mengirim permintaan GET ke API untuk mendapatkan daftar tugas. URL permintaan diatur dengan menggabungkan 'API_HOST' dengan jalur '/tasks'. Header permintaan diatur dengan menyertakan token akses dalam header "Authorization" menggunakan 'setRequestHeader()'. Setelah permintaan dikirim, fungsi 'onreadystatechange' akan dipanggil saat status permintaan berubah. Jika status permintaan adalah 4 (permintaan selesai) dan status HTTP adalah 200 (OK), kode akan melanjutkan untuk memproses respons API.
+
+Respons dari API berupa daftar tugas dalam bentuk objek JSON. Melalui penggunaan 'JSON.parse()', data tugas diurai menjadi objek JavaScript. Kemudian, setiap tugas dalam daftar '(tasks['data'])' diproses menggunakan metode 'forEach()'. Untuk setiap tugas, elemen HTML yang sesuai dibuat dan diatur dengan konten dan atribut yang sesuai. Elemen tugas kemudian ditambahkan ke dalam elemen yang sesuai ('todoItem' atau 'doneItem') berdasarkan status tugas.
+```
+const addForm = document.getElementById("form-add");
+addForm.addEventListener("submit", function (event) {
+  event.preventDefault();
+```
+Kode ini menangkap acara submit pada formulir dengan id "form-add" dan mencegah perilaku default form submit agar halaman tidak refresh saat tombol submit ditekan.
+```
+let xhr = new XMLHttpRequest();
+let url = API_HOST + "/tasks";
+let title = document.getElementById("title").value;
+let description = document.getElementById("description").value;
+```
+Variabel 'xhr' dideklarasikan sebagai objek 'XMLHttpRequest' yang akan digunakan untuk membuat permintaan HTTP. Variabel 'url' diatur untuk menentukan URL endpoint API untuk menambahkan tugas. Nilai input dari elemen dengan id "title" dan "description" dipilih dan disimpan dalam variabel 'title' dan 'description'.
+```
+const toastLiveExample = document.getElementById("liveToastAdd");
+const toastMsgAdd = document.getElementById("toast-body-add");
+const toast = new bootstrap.Toast(toastLiveExample);
+```
+Variabel 'toastLiveExample' dan 'toastMsgAdd' digunakan untuk mengambil elemen yang berkaitan dengan tampilan toast. Variabel 'toast' akan menjadi objek toast yang akan digunakan untuk menampilkan pesan.
+```
+if (title == "") {
+    toastMsgAdd.innerHTML = "Isian title tidak boleh kosong";
+    toast.show();
+}
+if (description == "") {
+    toastMsgAdd.innerHTML = "Isian deskripsi tidak boleh kosong";
+    toast.show();
+}
+```
+Kode ini melakukan validasi input untuk memastikan bahwa input "title" dan "description" tidak kosong. Jika salah satu atau kedua input kosong, maka pesan kesalahan akan ditampilkan menggunakan toast.
+```
+let new_data = JSON.stringify({
+    title: title,
+    description: description,
+});
+
+xhr.open("POST", url, true);
+xhr.setRequestHeader("Content-Type", "application/json;charset=utf-8");
+xhr.setRequestHeader("Authorization",`Bearer ${localStorage.getItem("access_token")}`);
+```
+Objek 'new_data' dibuat untuk menyimpan data tugas yang akan dikirim ke API. Objek ini diinisialisasi dengan menggunakan 'JSON.stringify()' untuk mengubah data menjadi format JSON. Selanjutnya, metode 'open()' pada objek 'xhr' dipanggil untuk mengatur permintaan dengan metode POST dan URL yang telah ditentukan. Header permintaan "Content-Type" diatur sebagai "application/json" untuk menunjukkan bahwa data dikirim dalam format JSON. Header "Authorization" diatur dengan menyertakan token akses yang diperoleh dari penyimpanan lokal menggunakan 'localStorage.getItem("access_token")'. Ini digunakan untuk mengotentikasi permintaan ke API.
+```
+xhr.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+        const myModalAdd = bootstrap.Modal.getInstance("#modalAdd");
+        myModalAdd.hide();
+
+        addForm.reset();
+        location.reload();
+    } else {
+        const toastLive = document.getElementById("liveToastAdd");
+        const toastMsg = document.getElementById("toast-body-add");
+        const toast = new bootstrap.Toast(toastLive);
+        toastMsg.innerHTML = "Data berhasil";
+        toast.show();
+    }
+  };
+  xhr.send(new_data);
+});
+```
+Kode ini menetapkan fungsi 'onreadystatechange' pada objek 'xhr' untuk menentukan tindakan yang akan diambil saat status permintaan berubah. Jika status permintaan adalah 4 (permintaan selesai) dan status HTTP adalah 200 (OK), maka tindakan berikut akan dijalankan:
+
+1. Menutup modal dengan id "modalAdd" menggunakan 'Modal.getInstance("#modalAdd").hide()'.
+2. Mengatur ulang formulir dengan 'addForm.reset()' untuk menghapus nilai input yang telah dimasukkan.
+3. Memuat ulang halaman dengan 'location.reload()' untuk memperbarui tampilan daftar tugas.
+
+Jika status permintaan tidak berhasil (status tidak sama dengan 200), maka pesan berhasil akan ditampilkan menggunakan toast.
+```
+const myModalEdit = document.getElementById("modalEdit");
+myModalEdit.addEventListener("show.bs.modal", function (event) {
+  let dataId = event.relatedTarget.attributes["data-id"];
+```
+Kode tersebut mengatur event handler untuk modal edit (myModalEdit) ketika event show.bs.modal dan mengambil atribut data-id dari elemen terkait yang memicu event (relatedTarget). Atribut ini menyimpan ID dari data yang akan diedit
+```
+let xhr = new XMLHttpRequest();
+let url = API_HOST + "/tasks/" + dataId.value;
+
+xhr.open("GET", url, true);
+xhr.setRequestHeader("Content-Type", "application/json;charset=utf-8");
+xhr.setRequestHeader("Authorization",`Bearer ${localStorage.getItem("access_token")}`
+);
+xhr.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+        let data = JSON.parse(this.response);
+        let oldTitle = document.getElementById("edit-title");
+        let oldDescription = document.getElementById("edit-description");
+        oldTitle.value = data.data.title;
+        oldDescription.value = data.data.description;
+    }
+};
+  xhr.send();
+```
+Kode ini membuat permintaan GET menggunakan objek XMLHttpRequest untuk mengambil data dengan ID yang spesifik. Permintaan dikirim ke URL yang sesuai dengan ID data yang diambil sebelumnya. Permintaan ini juga memasukkan header yang diperlukan, seperti "Content-Type" dan "Authorization". Ketika tanggapan berhasil diterima (status 200), data yang diterima diuraikan dari format JSON menjadi objek JavaScript. Nilai judul dan deskripsi kemudian ditetapkan pada elemen dengan ID "edit-title" dan "edit-description" untuk menampilkan data yang saat ini ada dalam formulir modal.
+```
+let editForm = document.getElementById("form-edit");
+editForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    let xhr = new XMLHttpRequest();
+    let url = API_HOST + "/tasks/" + dataId.value;
+
+    let newTitle = document.getElementById("edit-title").value;
+    let newDescription = document.getElementById("edit-description").value;
+    const toastLiveExample = document.getElementById("liveToastEdit");
+    const toastMsgEdit = document.getElementById("toast-body-edit");
+    const toast = new bootstrap.Toast(toastLiveExample);
+    if (newTitle == "") {
+        toastMsgEdit.innerHTML = "isian title tidak boleh kosong";
+        toast.show();
+    }
+    if (newDescription == "") {
+        toastMsgEdit.innerHTML = "isian description tidak boleh kosong";
+        toast.show();
+    }
+```
+Kode ini menangani event pengiriman formulir edit. Ketika formulir dikirim, fungsi yang ditentukan akan dieksekusi. Panggilan 'event.preventDefault()' mencegah perilaku bawaan dari formulir yang akan memperbarui halaman. Selanjutnya, nilai judul dan deskripsi yang diinput oleh pengguna diambil dari elemen formulir. Sebuah toast didefinisikan menggunakan Bootstrap Toast untuk menampilkan pesan yang relevan. Kemudian, validasi dilakukan untuk memastikan bahwa kedua input tidak kosong. Jika validasi tidak berhasil, pesan kesalahan akan ditampilkan pada toast yang sesuai.
+```
+```
+const myModalDelete = document.getElementById("modalDelete");
+myModalDelete.addEventListener("show.bs.modal", function (event) {
+  let dataId = event.relatedTarget.attributes["data-id"];
+```
+Kode ini mengambil referensi elemen modal delete menggunakan ID "modalDelete" dari elemen HTML. Kode ini menambahkan event listener ke modal delete ketika event show.bs.modal terjadi. Saat modal delete ditampilkan, fungsi yang ditentukan akan dieksekusi. Kode ini mendapatkan ID data yang dihapus dari atribut "data-id" elemen yang diklik oleh pengguna. Atribut "data-id" berisi informasi ID yang digunakan untuk mengidentifikasi data yang akan dihapus.
+```
+```
+const deleteForm = document.getElementById("formDelete");
+deleteForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    let xhr = new XMLHttpRequest();
+    let url = API_HOST + "/tasks/" + dataId.value;
+
+    xhr.open("DELETE", url, true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=utf-8");
+    xhr.setRequestHeader(
+      "Authorization",
+      `Bearer ${localStorage.getItem("access_token")}`
+    );
+    xhr.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        let response = JSON.parse(this.response);
+
+        const myModalDelete = bootstrap.Modal.getInstance("modalDelete");
+        myModalDelete.hide();
+
+        const alertLoc = document.getElementById("alert-loc");
+        const alertEl = document.createElement("div");
+        alertEl.setAttribute("class", "alert alert-success");
+        alertEl.setAttribute("role", "alert");
+        alertEl.innerHTML = response.message;
+
+        alertLoc.append(alertEl);
+
+        document.getElementById(dataId.value).classList.add("d-none");
+      }
+    };
+    xhr.send();
+  });
+});
+```
+Kode ini membuat objek XMLHttpRequest untuk melakukan permintaan DELETE ke API. URL permintaan dibentuk dengan menggunakan URL API dan ID data yang akan dihapus. Header yang diperlukan, seperti "Content-Type" dan "Authorization", juga ditetapkan. Kode ini menangani respons yang diterima setelah permintaan DELETE berhasil dilakukan. Respons JSON diterjemahkan menjadi objek JavaScript. Modal delete ditutup menggunakan myModalDelete.hide(). Selain itu, sebuah elemen alert dibuat untuk menampilkan pesan sukses. Elemen tersebut diberi atribut kelas dan atribut peran, serta mengandung pesan dari respons. Selanjutnya, elemen dengan ID yang sesuai akan diberi kelas "d-none" untuk menyembunyikannya dari tampilan.
+```
+function showRealTimeClock(){
+    const footerTime = document.getElementById("footer-time")
+    const time = new Date()
+    footerTime.innerHTML = time.toLocaleTimeString([],{
+        hour12: false
+    });
+}
+
+setInterval(showRealTimeClock, 1000)
+```
+Kode ini mengambil elemen pada halaman dengan ID "footer-time" dan menyimpannya dalam variabel footerTime, kemudian membuat objek Date baru yang akan merepresentasikan waktu aktual saat ini. Kode ini menggunakan metode toLocaleTimeString() pada objek Date untuk mendapatkan waktu aktual dalam bentuk string dengan format yang sesuai dengan pengaturan lokal. Opsi { hour12: false } digunakan untuk menampilkan waktu dalam format 24 jam. Kemudian, waktu yang telah diformat tersebut ditetapkan sebagai isi dari elemen footerTime menggunakan properti innerHTML. Kode ini menggunakan fungsi setInterval untuk memanggil fungsi showRealTimeClock setiap 1000 milidetik (1 detik). Dengan demikian, waktu yang ditampilkan pada elemen "footer-time" akan diperbarui secara otomatis setiap detik.
+
+### Code 12
+Code ini berada di app/tasks/__init__.py
+```
+from flask import Blueprint
+from flask_cors import CORS
+
+taskBp = Blueprint('task', __name__)
+CORS(taskBp)
+
+from app.task import routes
+```
+Kode ini mengimpor kelas Blueprint dari modul flask dan fungsi CORS dari modul flask_cors. Kode ini membuat objek Blueprint dengan nama 'task'. Blueprint digunakan untuk mendefinisikan sekumpulan rute (routes) yang terkait dengan suatu bagian atau fitur dalam aplikasi. Kemudian, Kode ini mengaktifkan fitur CORS untuk Blueprint 'task'. CORS memungkinkan permintaan HTTP dari asal yang berbeda untuk mengakses sumber daya (misalnya API) pada server. Kode ini mengimpor modul routes dari package app.task. Modul routes berisi definisi rute-rute HTTP yang terkait dengan fitur tugas (task) dalam aplikasi.
+
+### Code 13
+Code ini berada di app/tasks/routes.py
+```
+@taskBp.route('/', methods=['GET'], strict_slashes = False)
+@jwt_required(locations=["headers"])
+```
+Kode ini mendefinisikan rute HTTP dengan metode GET dan path '/' pada Blueprint 'task'. Ketika rute ini diakses dengan metode GET, fungsi yang terdekorasi di bawahnya akan dieksekusi. Kode ini mengaplikasikan autentikasi JWT pada rute tersebut. Hanya pengguna yang memiliki JWT yang valid dan terkait dengan otorisasi yang sesuai yang dapat mengakses rute ini. Lokasi JWT diatur sebagai header.
+```
+def get_all_tasks():
+    limit = request.args.get('limit', 10)
+    current_user_id = get_jwt_identity()
+```
+Kode ini mendefinisikan fungsi get_all_tasks() sebagai penangan rute HTTP. Fungsi ini akan dieksekusi ketika rute '/' dengan metode GET diakses. Kode ini mengambil nilai parameter query string 'limit' dari permintaan HTTP. Jika parameter tidak ada, nilai default yang digunakan adalah 10. Kode ini mendapatkan identitas pengguna saat ini yang terkait dengan JWT yang valid. Identitas ini bisa digunakan untuk melakukan verifikasi atau aksi berdasarkan pengguna yang sedang login.
+```
+if type(limit) is not int:
+    return jsonify({
+    "message": "Invalid Parameter"
+}), 400
+```
+Kode ini memeriksa apakah tipe data dari parameter 'limit' adalah integer. Jika bukan, maka respons JSON dengan pesan kesalahan dikembalikan dengan kode status 400 (Bad Request).
+```
+tasks = db.session.execute(db.select(Tasks).limit(limit)).scalars()
+```
+Kode ini menggunakan SQLAlchemy untuk melakukan query ke database dan mengambil daftar tugas. Fungsi db.session.execute() digunakan untuk menjalankan query, sedangkan db.select(Tasks) adalah ekspresi SQLAlchemy yang menghasilkan SELECT statement untuk tabel 'Tasks'. Metode limit() digunakan untuk membatasi jumlah hasil yang diambil dari database.
+```
+result = []
+for task in tasks:
+    result.append(task.serialize())
+
+return jsonify({
+    "success": True,
+    "data": result
+}), 200
+```
+Kode ini mengiterasi melalui setiap tugas dalam daftar tasks dan mengubah setiap tugas menjadi format serialisasi JSON. Fungsi task.serialize() digunakan untuk mengonversi objek tugas menjadi format JSON. Kode ini mengembalikan respons JSON yang berisi daftar tugas dalam format JSON. Kode status 200 (OK) digunakan untuk menandakan bahwa permintaan berhasil.
+```
+@taskBp.route('<int:id>', methods=['GET'], strict_slashes = False)
+@jwt_required(locations=["headers"])
+```
+Kode ini mendefinisikan rute HTTP dengan metode GET dan path '/int:id' pada Blueprint 'task'. Path ini mengandung parameter <int:id> yang akan digunakan untuk menyimpan nilai ID dari tugas yang akan diambil. Ketika rute ini diakses dengan metode GET, fungsi yang terdekorasi di bawahnya akan dieksekusi. Kode ini mengaplikasikan autentikasi JWT pada rute tersebut. Hanya pengguna yang memiliki JWT yang valid dan terkait dengan otorisasi yang sesuai yang dapat mengakses rute ini. Lokasi JWT diatur sebagai header.
+```
+def get_task_by_id(id):
+    task = Tasks.query.filter_by(id=id).first()
+```
+Kode ini mendefinisikan fungsi get_task_by_id(id) sebagai penangan rute HTTP. Fungsi ini akan dieksekusi ketika rute '/int:id' dengan metode GET diakses. Kode ini menggunakan SQLAlchemy untuk mengambil tugas dari database berdasarkan ID yang diberikan. Fungsi Tasks.query digunakan untuk memulai query SQLAlchemy pada tabel 'Tasks'. Metode filter_by(id=id) digunakan untuk memfilter tugas berdasarkan kolom 'id' yang sesuai dengan nilai id yang diberikan. Metode first() digunakan untuk mengambil satu hasil pertama yang sesuai dengan query.
+```
+if not task:
+    return jsonify({'message': 'task not found'}), 404
+
+task = task.serialize()
+return jsonify({
+    'success': True,
+    'data': task
+}), 200
+```
+Kode ini memeriksa apakah tugas dengan ID yang diberikan ditemukan dalam database. Jika tidak ditemukan, maka respons JSON dengan pesan kesalahan "task not found" dikembalikan dengan kode status 404 (Not Found). Fungsi task.serialize() digunakan untuk mengonversi objek tugas menjadi format JSON. Kode ini mengembalikan respons JSON yang berisi tugas yang ditemukan dalam format JSON. Kode status 200 (OK) digunakan untuk menandakan bahwa permintaan berhasil
+```
+```
+@taskBp.route('/', methods=['POST'], strict_slashes = False)
+@jwt_required(locations=["headers"])
+```
+Kode ini mendefinisikan rute HTTP dengan metode POST dan path '/' pada Blueprint 'task'. Ketika rute ini diakses dengan metode POST, fungsi yang terdekorasi di bawahnya akan dieksekusi. Kode ini mengaplikasikan autentikasi JWT pada rute tersebut. Hanya pengguna yang memiliki JWT yang valid dan terkait dengan otorisasi yang sesuai yang dapat mengakses rute ini. Lokasi JWT diatur sebagai header.
+```
+def create_task():
+    data = request.get_json()
+    title = data['title']
+    description = data['description']
+    user_id = get_jwt_identity()
+
+    if not title or not description or not user_id:
+        return jsonify({"message": "Incomplete data"}), 422
+    
+    new_task = Tasks(title = title, description = description, user_id = user_id)
+
+    db.session.add(new_task)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "data": new_task.serialize()
+    }), 200
+```
+Kode ini mendefinisikan fungsi create_task() sebagai penangan rute HTTP. Fungsi ini akan dieksekusi ketika rute '/' dengan metode POST diakses. Kode ini menggunakan request.get_json() untuk mendapatkan data dari permintaan HTTP dalam format JSON. Data ini kemudian digunakan untuk mengambil nilai 'title', 'description', dan 'user_id'. Nilai 'user_id' didapatkan dari JWT pengguna yang terautentikasi. Kode ini memeriksa apakah nilai 'title', 'description', atau 'user_id' kosong. Jika salah satu nilai tersebut kosong, maka respons JSON dengan pesan kesalahan "Incomplete data" dikembalikan dengan kode status 422 (Unprocessable Entity). Kode ini membuat objek tugas baru dengan menggunakan nilai 'title', 'description', dan 'user_id'. Objek tugas baru ini kemudian ditambahkan ke sesi database menggunakan db.session.add() dan perubahan disimpan menggunakan db.session.commit(). Kode ini mengembalikan respons JSON yang berisi tugas yang baru dibuat dalam format JSON. Kode status 200 (OK) digunakan untuk menandakan bahwa permintaan berhasil.
+```
+@taskBp.route('<int:id>', methods=['PUT'], strict_slashes = False)
+@jwt_required(locations=["headers"])
+```
+def update_task(id):
+    current_user_id = get_jwt_identity()
+
+    data = request.get_json()
+    title = data['title']
+    description = data['description']
+
+    task = Tasks.query.filter_by(id=id).first()
+
+    if not task:
+        return jsonify({"message": "Task Not Found!"}), 404
+    
+    if not title or not description:
+        return jsonify({"message": "Incomplete data"}), 422
+    
+    if current_user_id != task.user_id:
+        return jsonify({"message": "Unauthorized action"}), 422
+    
+    task.title = title
+    task.description = description
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Task successfully updated!"
+    }), 200
+
+```
