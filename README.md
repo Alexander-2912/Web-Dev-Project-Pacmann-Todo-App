@@ -1057,6 +1057,7 @@ def delete_user(id):
     user = Users.query.filter_by(id=id).first()
 ```
 Kode ini mendefinisikan rute dengan pola URL <int:id>, yang berarti akan menangani permintaan DELETE untuk menghapus pengguna dengan ID tertentu. Blueprint yang digunakan adalah userBp. Kode ini menggunakan metode filter_by pada kelas Users (asumsi kelas ini merupakan model pengguna) untuk mencari pengguna dengan ID yang sesuai dengan nilai id yang diberikan. Jika pengguna tidak ditemukan, maka akan dikembalikan respons JSON dengan pesan error "User Not Found!" dan kode status 404.
+```
     if not user:
         return jsonify({
             "message": 'User Not Found!'
